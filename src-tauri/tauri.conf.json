@@ -11,12 +11,16 @@
   },
   "app": {
     "windows": [
-      {
-        "title": "IPTV Pro",
-        "width": 800,
-        "height": 60
-      }
-    ],
+  {
+    "title": "IPTV Pro",
+    "width": 1400,
+    "height": 900,
+    "minWidth": 1000,
+    "minHeight": 700,
+    "resizable": true,
+    "center": true
+  }
+],
     "security": {
       "csp": null
     }
