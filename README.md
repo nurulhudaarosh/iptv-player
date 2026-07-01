@@ -1,4 +1,4 @@
-````markdown
+
 # IPTV Pro
 
 A modern, lightweight, and cross-platform IPTV player built with **Tauri**, **React**, and **TypeScript**. IPTV Pro delivers a clean desktop experience for streaming M3U/M3U8 playlists with high performance and low resource usage on Windows, Linux, and macOS.
@@ -145,5 +145,5 @@ GitHub: https://github.com/nurulhudaarosh
 ---
 
 ⭐ If you find this project useful, consider giving it a star on GitHub!
-````
+
 
