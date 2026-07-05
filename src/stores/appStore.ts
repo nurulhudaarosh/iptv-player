@@ -10,6 +10,7 @@ export const STORAGE_KEYS = {
   playlists: "iptv-player.playlists.v1",
   theme: "iptv-player.theme.v1",
   activePlaylistId: "iptv-player.active-playlist-id.v1",
+  proxyUrl: "iptv-player.proxy-url.v1",
 };
 
 export interface AppStoreValue {
@@ -19,9 +20,12 @@ export interface AppStoreValue {
   playlists: SavedPlaylist[];
   activePlaylistId: string | null;
   activePlaylist: SavedPlaylist | null;
+  proxyUrl: string | null;
+  serverPort: number | null;
+  setProxyUrl: (url: string | null) => void;
   setActivePlaylistId: Dispatch<SetStateAction<string | null>>;
   importPlaylistFiles: (files: File[]) => Promise<SavedPlaylist[]>;
-  importPlaylistFromUrl: (name: string, url: string) => Promise<SavedPlaylist | null>;
+  importPlaylistFromUrl: (name:string, url: string) => Promise<SavedPlaylist | null>;
   renamePlaylist: (playlistId: string, nextName: string) => void;
   deletePlaylist: (playlistId: string) => void;
 }

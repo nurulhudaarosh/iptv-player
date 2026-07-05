@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 
 import type { ReactNode } from "react";
 
@@ -26,8 +27,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [activePlaylistId, setActivePlaylistId] = useState<string | null>(() =>
     readStorage<string | null>(STORAGE_KEYS.activePlaylistId, null)
   );
+  const [proxyUrl, setProxyUrl] = useState<string | null>(() =>
+    readStorage<string | null>(STORAGE_KEYS.proxyUrl, null)
+  );
+  const [serverPort, setServerPort] = useState<number | null>(null);
 
   const isDark = theme === "dark";
+
+  useEffect(() => {
+    invoke<number>("get_server_port").then(setServerPort);
+  }, []);
 
   useEffect(() => {
     writeStorage(STORAGE_KEYS.theme, theme);
@@ -40,6 +49,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     writeStorage(STORAGE_KEYS.activePlaylistId, activePlaylistId);
   }, [activePlaylistId]);
+
+  useEffect(() => {
+    writeStorage(STORAGE_KEYS.proxyUrl, proxyUrl);
+  }, [proxyUrl]);
 
   useEffect(() => {
     if (typeof document === "undefined") {
@@ -135,7 +148,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     let channels = [] as SavedPlaylist["channels"];
 
     try {
-      channels = await loadPlaylistFromUrl(playlistUrl.toString());
+      channels = await loadPlaylistFromUrl(playlistUrl.toString(), proxyUrl);
     } catch (error) {
       console.error(error);
       return null;
@@ -198,13 +211,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
       playlists,
       activePlaylistId,
       activePlaylist,
+      proxyUrl,
+      serverPort,
+      setProxyUrl,
       setActivePlaylistId,
       importPlaylistFiles,
       importPlaylistFromUrl,
       renamePlaylist,
       deletePlaylist,
     }),
-    [theme, isDark, playlists, activePlaylistId, activePlaylist]
+    [theme, isDark, playlists, activePlaylistId, activePlaylist, proxyUrl, serverPort]
   );
 
   return <AppStoreContext.Provider value={value}>{children}</AppStoreContext.Provider>;

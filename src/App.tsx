@@ -8,6 +8,7 @@ import FavoritesPage from "./pages/Favorites/Favorites.tsx";
 import PlaylistPage from "./pages/Playlist/Playlist.tsx";
 import SearchPage from "./pages/Search/Search.tsx";
 import SettingsPage from "./pages/Settings/Settings.tsx";
+import { Toaster } from "react-hot-toast";
 import { AppProvider } from "./stores/AppProvider";
 import { useAppStore } from "./stores/appStore";
 import "./App.css";
@@ -29,12 +30,14 @@ function AppShell() {
 
   return (
     <div className={clsx("flex h-screen flex-col overflow-hidden", isDark ? "bg-zinc-950 text-zinc-100" : "bg-slate-100 text-slate-900")}>
+      <Toaster position="bottom-center" toastOptions={{ theme: isDark ? "dark" : "light" }} />
       <header className={clsx("grid grid-cols-[1fr_auto_1fr] items-center border-b px-4 py-3 lg:px-6", isDark ? "border-zinc-800 bg-zinc-950/95" : "border-slate-200 bg-white/90")}>
         <div className="flex items-center gap-4 justify-self-start">
           <Link to="/" className="text-lg font-semibold tracking-wide">
             IPTV Player
           </Link>
         </div>
+
 
         <nav className="flex items-center justify-center gap-1 justify-self-center">
             <NavLink to="/" className={navItemClass} end>

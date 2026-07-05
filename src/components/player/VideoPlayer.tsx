@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useAppStore } from "../../stores/appStore";
 
 import Hls from "hls.js";
 
@@ -15,8 +16,17 @@ function isHlsUrl(url: string) {
 export default function VideoPlayer({ url }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
+  const { proxyUrl, serverPort } = useAppStore();
+
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const streamUrl = useMemo(() => {
+    if (proxyUrl && serverPort) {
+      return `http://127.0.0.1:${serverPort}/stream?url=${encodeURIComponent(url)}`;
+    }
+    return url;
+  }, [url, proxyUrl, serverPort]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -35,7 +45,7 @@ export default function VideoPlayer({ url }: Props) {
     video.removeAttribute("src");
     video.load();
 
-    const hlsUrl = isHlsUrl(url);
+    const hlsUrl = isHlsUrl(streamUrl);
 
     if (hlsUrl && Hls.isSupported()) {
       const hls = new Hls({
@@ -45,7 +55,7 @@ export default function VideoPlayer({ url }: Props) {
 
       hlsRef.current = hls;
 
-      hls.loadSource(url);
+      hls.loadSource(streamUrl);
       hls.attachMedia(video);
 
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
@@ -66,7 +76,7 @@ export default function VideoPlayer({ url }: Props) {
     }
 
     if (video.canPlayType("application/vnd.apple.mpegurl") && hlsUrl) {
-      video.src = url;
+      video.src = streamUrl;
       video.addEventListener("canplay", () => setIsLoading(false), { once: true });
       video.addEventListener("error", () => {
         setError("Unable to play this stream.");
@@ -77,7 +87,7 @@ export default function VideoPlayer({ url }: Props) {
       };
     }
 
-    video.src = url;
+    video.src = streamUrl;
 
     video.addEventListener("canplay", () => setIsLoading(false), { once: true });
     video.addEventListener("playing", () => setIsLoading(false), { once: true });
@@ -89,7 +99,7 @@ export default function VideoPlayer({ url }: Props) {
     return () => {
       video.removeAttribute("src");
     };
-  }, [url]);
+  }, [streamUrl]);
 
   useEffect(() => {
     return () => {
