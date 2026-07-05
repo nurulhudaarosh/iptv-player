@@ -41,10 +41,12 @@ export default function Home() {
 
     const query = searchQuery.trim().toLowerCase();
 
-    return activePlaylist.channels.filter((channel) => {
+    const filtered = activePlaylist.channels.filter((channel) => {
       const matchesGroup =
-        groupFilter === "all" ||
-        normalizeGroup(channel.group) === normalizeGroup(groupFilter);
+        groupFilter === "all"
+          ? true
+          : !!channel.group && normalizeGroup(channel.group) === normalizeGroup(groupFilter);
+
       const matchesSearch =
         !query ||
         channel.name.toLowerCase().includes(query) ||
@@ -52,6 +54,37 @@ export default function Home() {
 
       return matchesGroup && matchesSearch;
     });
+
+    // Defensive deduplication. The root cause of duplicates is unknown,
+    // but this prevents the UI from showing them.
+    const seenUrls = new Set<string>();
+    const uniqueFiltered = filtered.filter((channel) => {
+      if (seenUrls.has(channel.url)) {
+        return false;
+      }
+      seenUrls.add(channel.url);
+      return true;
+    });
+
+    if (query) {
+      return uniqueFiltered.sort((a, b) => {
+        const aName = a.name.toLowerCase();
+        const bName = b.name.toLowerCase();
+        const aGroup = (a.group ?? "").toLowerCase();
+
+        // Score: 3 for name startsWith, 2 for name includes, 1 for group includes
+        const aScore = aName.startsWith(query) ? 3 : aName.includes(query) ? 2 : aGroup.includes(query) ? 1 : 0;
+        const bScore = bName.startsWith(query) ? 3 : bName.includes(query) ? 2 : aGroup.includes(query) ? 1 : 0;
+
+        if (aScore !== bScore) {
+          return bScore - aScore; // Higher score first
+        }
+
+        return aName.localeCompare(bName); // Then alphabetical
+      });
+    }
+
+    return uniqueFiltered;
   }, [activePlaylist, groupFilter, searchQuery]);
 
   const selectedChannel = useMemo(() => {

@@ -20,12 +20,13 @@ export function parseM3U(content: string): Channel[] {
       current.group = value.match(/group-title="([^"]+)"/)?.[1];
 
       current.tvgId = value.match(/tvg-id="([^"]+)"/)?.[1];
-    }
+    } else if (value.startsWith("http")) {
+      if (current.name) {
+        current.url = value;
 
-    else if (value.startsWith("http")) {
-      current.url = value;
-
-      channels.push(current as Channel);
+        channels.push(current as Channel);
+      }
+      current = {};
     }
   }
 
